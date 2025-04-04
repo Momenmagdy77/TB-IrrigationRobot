@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTS</title>
+
+    
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Bebas+Neue&family=Playfair+Display:wght@700&family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+
+    <!--flatpickr for real time date fill-->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+          }
+        .container {
+            padding: 10px;
+            text-align: center;
+            align-items: center;
+          }
+          .container a {
+            font-family: "Playfair Display", serif;
+    
+            color: white;
+            font-size: 40px;
+            font-weight: bolder;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+          }
+          .nav1 {
+            background-color: #1f4e5f ;
+            justify-content: center;
+            position: relative;
+            display: flex;
+            
+          }
+          .icon2 {
+            padding-top: 15px;
+          }
+        
+       .RTST h1{
+width: 400px;
+margin: auto;
+font-family: "Playfair Display", serif;
+font-weight: bolder;
+padding-top: 20px;
+align-items: center;
+
+font-size: 40px;
+text-align: center;
+justify-content: center;
+position: relative;
+display: flex;
+gap: 10px;
+color: #79a8a9;
+       }
+
+       .camera-feed {
+        margin: 20px auto;
+        width: 60%;
+        max-width: 640px;
+        border: 5px solid #aacfd0;
+        border-radius: 15px;
+        overflow: hidden;
+      }
+      .camera-feed img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+    </style>
+</head>
+<body>
+    <nav class="nav1">
+        <div class="container">
+          <a href="index.html"
+            >TBR
+            <img
+              src="waterwork-svgrepo-com (1).svg"
+              alt="icon"
+              width="50px"
+              height="50px"
+          /></a>
+        </div>
+        <div class="icon2">
+          <a href="realtime.html">
+            <img
+              src="real-time-data-display-svgrepo-com (2).svg"
+              alt="icon"
+              width="50px"
+              height="50px"
+            />
+          </a>
+       
+        </div>
+      </nav>
+    <nav class="RTST">
+        <span>
+    <h1>
+Realtime Status
+<img src="clock-svgrepo-com.svg" alt="icon" width="50px" height="50px">
+    </h1>
+</span>
+    </nav>
+         <!-- ESP32-CAM Live Feed -->
+         <div class="camera-feed">
+            <img
+              src="http://<ESP32-CAM-IP>/stream"
+              alt="Live Camera Feed"
+              onerror="this.src='fallback-image.jpg'"
+            />
+          </div>
+          <script>
+            setInterval(() => {
+                const img = document.querySelector(".camera-feed img");
+                img.src = `http://<ESP32-CAM-IP>/stream?t=${new Date().getTime()}`;
+              }, 1000); // Refresh every 1 second
+          </script>
+</body>
+</html>
