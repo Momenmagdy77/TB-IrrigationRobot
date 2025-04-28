@@ -1,503 +1,970 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Robot Irrigation Control</title>
+    
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
-    />
-
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"
-    />
-
-    <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Bebas+Neue&family=Playfair+Display:wght@700&family=Pacifico&display=swap"
-      rel="stylesheet"
-    />
-
-    <!--flatpickr for real time date fill-->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
-    />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Bebas+Neue&family=Playfair+Display:wght@700&family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #ffffff;
-      }
-      #map {
-        height: 60vh;
-        width: 60%;
-        margin: auto;
-        border: 5px #aacfd0;
-        border-radius: 15px;
-        overflow: hidden;
-      }
-      .controls {
-        padding: 15px;
-        background: #fff;
-        border-bottom: 1px solid #ccc;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        align-items: center;
-        justify-content: center;
-      }
-      .controls label {
-        font-size: 14px;
-        margin-right: 5px;
-      }
-      .controls input,
-      .controls select,
-      .controls button,
-      .search-container button {
-        padding: 5px 10px;
-        font-size: 14px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-      }
-      button {
-        background-color: #aacfd0;
-        color: white;
-        border: none;
-        cursor: pointer;
-      }
-      button:hover {
-        background-color: #79a8a9;
-      }
-      .area-display {
-        margin-top: 10px;
-        font-size: 16px;
-        font-weight: bold;
-        text-align: center;
-      }
-      .search-container {
-        margin-top: 10px;
-        text-align: center;
-      }
-      .search-container input {
-        width: 200px;
-        padding: 5px;
-        font-size: 14px;
-      }
+        :root {
+            --primary-color: #1f4e5f;
+            --primary-light: #3a6d7f;
+            --secondary-color: #aacfd0;
+            --secondary-light: #c5e0e1;
+            --accent-color: #79a8a9;
+            --accent-light: #94c3c4;
+            --text-light: #ffffff;
+            --text-dark: #333333;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-      .results-window {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: #fff;
-        padding: 20px;
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-        z-index: 1000;
-        display: none;
-      }
-      .results-window h2 {
-        margin-top: 0;
-        font-size: 18px;
-        color: #333;
-      }
-      .results-window p {
-        margin: 5px 0;
-        font-size: 14px;
-        color: #555;
-      }
-      .close-btn {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: #ff4d4d;
-        color: white;
-        border: none;
-        padding: 5px 10px;
-        cursor: pointer;
-        border-radius: 4px;
-      }
-      .close-btn:hover {
-        background: #cc0000;
-      }
-      .view {
-        text-decoration: none;
-        align-items: center;
-      }
-      .container {
-        padding: 10px;
-        text-align: center;
-        align-items: center;
-      }
-      .container a {
-        font-family: "Playfair Display", serif;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Navigation Bar */
+        .nav1 {
+            background-color: var(--primary-color);
+            padding: 1rem 0.5rem; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
 
-        color: white;
-        font-size: 40px;
-        font-weight: bolder;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .nav1 {
-        background-color: #1f4e5f;
-        justify-content: center;
-        position: relative;
-        display: flex;
-      }
-      .icon2 {
-        padding-top: 15px;
-      }
-      .icon3 {
-        padding-top: 8px;
-      }
+        .logo-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .logo {
+            display: flex;
+            gap: 2px;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .logo img {
+            height: 50px;
+            width: 50px;
+            width: auto;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            margin: 0;
+            padding: 0;
+            vertical-align: middle;
+        }
+
+        .logo:hover img {
+            transform: scale(1.1) rotate(10deg);
+        }
+
+        .logo-text {
+            color: var(--text-light);
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 2.5rem;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover .logo-text {
+            color: var(--secondary-color);
+        }
+
+        /* Navigation Links */
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            background-color: rgba(255,255,255,0.1);
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            margin-top: 10px;
+        }
+
+        .nav-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.5rem 0;
+            position: relative;
+        }
+
+        .nav-links a i {
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--secondary-color);
+        }
+
+        .nav-links a:hover i {
+            transform: scale(1.2);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 3px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--secondary-color);
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+
+        .nav-links a:hover::after,
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .nav-links a.active {
+            color: var(--secondary-color);
+            font-weight: 700;
+        }
+
+        /* Main Container */
+        .main-container {
+            display: flex;
+            flex: 1;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .left-panel {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .map-panel {
+            flex: 3;
+        }
+
+        .right-panel {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        /* Controls */
+        .controls, .search-container, .save-form {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .controls label, .search-container label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .controls input, .controls select, 
+        .search-container input, 
+        .save-form input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background-color: var(--primary-light);
+        }
+
+        .button-danger {
+            background-color: var(--accent-color);
+        }
+
+        .button-danger:hover {
+            background-color: var(--accent-light);
+        }
+
+        /* Map */
+        #map {
+            height: 100%;
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        /* Results */
+        .results-window {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .results-window h2 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 5px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .result-label {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* Circle Numbers */
+        .circle-number-container {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1000;
+            transform: translate(-50%, -50%);
+        }
+
+        .circle-number {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: var(--primary-color);
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+            border: 2px solid var(--primary-color);
+        }
+
+        /* Dropdown */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropbtn {
+            background-color: transparent;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.5rem 0;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 250px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 4px;
+            padding: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .saved-plan-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .saved-plan-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .plan-header {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .delete-plan {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+
+        /* Irrigation button */
+        .irrigation-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: auto;
+            padding: 15px 25px;
+            font-size: 1.1rem;
+            z-index: 1000;
+        }
+
+        #irrigation-status {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
+    <!-- Navigation Bar -->
     <nav class="nav1">
-      <div class="container">
-        <a href="index.html"
-          >TBR
-          <img
-            src="waterwork-svgrepo-com (1).svg"
-            alt="icon"
-            width="50px"
-            height="50px"
-        /></a>
-      </div>
-      <div class="icon2">
-        <a href="realtime.html">
-          <img
-            src="real-time-data-display-svgrepo-com (2).svg"
-            alt="icon"
-            width="50px"
-            height="50px"
-          />
-        </a>
-      </div>
-      <div class="icon3">
-        <a href="Evaluation.html">
-          <img
-            src="evaluation-svgrepo-com.svg"
-            alt="icon"
-            width="65px"
-            height="65px"
-          />
-        </a>
-      </div>
+        <div class="logo-container">
+            <div class="logo" onclick="window.location='index.html'">
+                <span class="logo-text">TBR</span>
+                <img src="waterwork-svgrepo-com (1).svg" alt="TBR Logo">
+            </div>
+        </div>
+        
+        <!-- Navigation Links -->
+        <div class="nav-links">
+            <a href="index.html" class="active">
+                <i class="fas fa-calculator"></i>
+                Calculate
+            </a>
+            <a href="evaluation.html">
+                <i class="fas fa-chart-line"></i>
+                Evaluation
+            </a>
+            <a href="control.html">
+                <i class="fa-solid fa-robot"></i>
+                Control
+            </a>
+            <div class="dropdown">
+                <button class="dropbtn">
+                    <i class="fas fa-save"></i> Saved Plans
+                </button>
+                <div class="dropdown-content" id="saved-plans-dropdown">
+                    <div class="no-plans">No saved plans yet</div>
+                </div>
+            </div>
+        </div>
     </nav>
-    <div class="controls">
-      <label for="plantType">Plant Type:</label>
-      <select id="plantType">
-        <option value="grass">Grass 🌿</option>
-      </select>
 
-      <label for="date">Date</label>
-      <input
-        id="localdate"
-        type="datetime-local"
-        placeholder="Select DateTime"
-      />
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="left-panel">
+            <div class="controls">
+                <label for="plantType">Plant Type:</label>
+                <select id="plantType">
+                    <option value="grass">Grass 🌿</option>
+                </select>
 
-      <label for="sprinklerRadius">Sprinkler Radius (m):</label>
-      <input type="number" id="sprinklerRadius" placeholder="e.g., 5" min="1" />
+                <label for="date">Date</label>
+                <input id="localdate" type="datetime-local">
 
-      <label for="waterFlowRate">Precipitation Rate (mm/hr):</label>
-      <input type="number" id="waterFlowRate" placeholder="e.g., 10" min="1" />
+                <label for="sprinklerRadius">Sprinkler Radius (m):</label>
+                <input type="number" id="sprinklerRadius" placeholder="e.g., 5" min="1">
 
-      <button onclick="calculateIrrigation()">Calculate</button>
+                <label for="waterFlowRate">Precipitation Rate (mm/hr):</label>
+                <input type="number" id="waterFlowRate" placeholder="e.g., 10" min="1">
+
+                <button id="drawModeBtn">Enable Drawing Mode</button>
+                <button id="deleteLastBtn" class="button-danger">Delete Last Circle</button>
+                <button id="clearAllBtn" class="button-danger">Clear All Circles</button>
+                <button onclick="calculateIrrigation()">Calculate</button>
+            </div>
+
+            <div class="search-container">
+                <input type="text" id="searchLocation" placeholder="Search for a location...">
+                <button onclick="searchLocation()">Search</button>
+            </div>
+
+            <div class="area-display" id="areaDisplay">
+                Calculated Area: <span id="areaValue">0</span> m²
+            </div>
+
+            <div class="save-form">
+                <h3>Save Irrigation Plan</h3>
+                <input type="text" id="plan-name" placeholder="Enter plan name">
+                <button id="save-calculation">Save Plan</button>
+            </div>
+        </div>
+
+        <div class="map-panel">
+            <div id="map"></div>
+        </div>
+
+        <div class="right-panel">
+            <div class="results-window" id="resultsWindow" style="display: none;">
+                <h2>Irrigation Results</h2>
+                <div class="result-item">
+                    <span class="result-label">Plant Type:</span>
+                    <span id="resultPlantType"></span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Area Covered:</span>
+                    <span id="resultArea"></span> m²
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Daily Water Need:</span>
+                    <span id="resultWaterNeed"></span> mm
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Precipitation Rate:</span>
+                    <span id="resultFlowRate"></span> mm/hr
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Number of Robot Points:</span>
+                    <span id="resultPoints"></span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Irrigation Time per Point:</span>
+                    <span id="resultTimePerPoint"></span> hr
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Total Irrigation Time:</span>
+                    <span id="resultTotalTime"></span> hr
+                </div>
+                <div class="result-item">
+                    <span class="result-label">First Robot Point:</span>
+                    <span id="resultFirstPoint"></span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Last Robot Point:</span>
+                    <span id="resultLastPoint"></span>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="search-container">
-      <input
-        type="text"
-        id="searchLocation"
-        placeholder="Search for a location..."
-      />
-      <button class="search2" onclick="searchLocation()">Search</button>
-    </div>
+    <!-- Start Irrigation Button -->
+    <button id="start-irrigation-btn" onclick="sendToRobot()" class="irrigation-btn">
+        Start Irrigation
+    </button>
+    <div id="irrigation-status">Status: Ready</div>
 
-    <div class="area-display" id="areaDisplay">
-      Calculated Area <span id="areaValue">0</span> m²
-    </div>
-
-    <div id="map"></div>
-
-    <div class="results-window" id="resultsWindow">
-      <h2>Irrigation Results</h2>
-      <p><strong>Plant Type:</strong> <span id="resultPlantType"></span></p>
-      <p><strong>Area Covered:</strong> <span id="resultArea"></span> m²</p>
-      <p>
-        <strong>Daily Water Need:</strong> <span id="resultWaterNeed"></span> mm
-      </p>
-      <p>
-        <strong>Precipitation Rate:</strong>
-        <span id="resultFlowRate"></span> mm/hr
-      </p>
-      <p>
-        <strong>Number of Robot Points:</strong> <span id="resultPoints"></span>
-      </p>
-      <p>
-        <strong>Irrigation Time per Point:</strong>
-        <span id="resultTimePerPoint"></span> hr
-      </p>
-      <p>
-        <strong>Total Irrigation Time:</strong>
-        <span id="resultTotalTime"></span> hr
-      </p>
-      <p>
-        <strong>First Robot Point:</strong> <span id="resultFirstPoint"></span>
-      </p>
-      <p>
-        <strong>Last Robot Point:</strong> <span id="resultLastPoint"></span>
-      </p>
-    </div>
-
-    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
-
-    <!--flatpickr script link-->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 
     <script>
-      // Initialize flatpickr for date selection
-      const fp = flatpickr("#localdate", {});
+        // Global variables
+        let circles = [];
+        let drawMode = false;
+        let map;
+        let selectedArea = null;
+        let currentCalculation = null;
+        let drawnItems = new L.FeatureGroup();
 
-      // Initialize map
-      const map = L.map("map").setView([30.0444, 31.2357], 16); // Default coordinates (Cairo)
-
-      // Add OpenStreetMap tiles
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution: "© OpenStreetMap",
-      }).addTo(map);
-
-      // Add Leaflet.draw controls
-      const drawnItems = new L.FeatureGroup();
-      map.addLayer(drawnItems);
-
-      const drawControl = new L.Control.Draw({
-        edit: {
-          featureGroup: drawnItems,
-          remove: true,
-        },
-        draw: {
-          polygon: true,
-          marker: false,
-          polyline: true,
-          rectangle: true,
-          circle: false,
-          circlemarker: false,
-        },
-      });
-      map.addControl(drawControl);
-
-      // Handle draw created event
-      let selectedArea = null;
-      map.on(L.Draw.Event.CREATED, function (event) {
-        const layer = event.layer;
-        drawnItems.addLayer(layer);
-        selectedArea = layer;
-
-        // Calculate area
-        const area = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]); // Area in m²
-        document.getElementById("areaValue").innerText = (area / 1).toFixed(2); // Display area in m²
-        layer.bindPopup(`Area: ${(area / 1).toFixed(2)} m²`).openPopup();
-      });
-
-      // Function to check if a point is inside a polygon
-      function isPointInPolygon(point, polygon) {
-        const x = point.lat,
-          y = point.lng;
-        let inside = false;
-        for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-          const xi = polygon[i].lat,
-            yi = polygon[i].lng;
-          const xj = polygon[j].lat,
-            yj = polygon[j].lng;
-          const intersect =
-            yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
-          if (intersect) inside = !inside;
-        }
-        return inside;
-      }
-
-      // Function to calculate irrigation data
-      function calculateIrrigation() {
-        const plantType = document.getElementById("plantType").value;
-        const sprinklerRadius = parseFloat(
-          document.getElementById("sprinklerRadius").value
-        );
-        const waterFlowRate = parseFloat(
-          document.getElementById("waterFlowRate").value
-        );
-
-        // Validate inputs
-        if (!sprinklerRadius || !waterFlowRate || !selectedArea ||!localdate ) {
-          alert("Please fill in all inputs and select an area on the map.");
-          return;
-        }
-
-        // Calculate irrigation points
-        const bounds = selectedArea.getBounds();
-        const latlngs = [];
-        const latStep = (sprinklerRadius * 1) / 111320; // Convert meters to degrees (latitude) with slight overlap
-        const lngStep =
-          (sprinklerRadius * 1) /
-          (111320 * Math.cos(bounds.getCenter().lat * (Math.PI / 180))); // Convert meters to degrees (longitude) with slight overlap
-
-        const polygonLatLngs = selectedArea.getLatLngs()[0]; // Get polygon coordinates
-
-        for (
-          let lat = bounds.getSouthWest().lat - 0.5 * latStep;
-          lat < bounds.getNorthEast().lat + 0.5 * latStep;
-          lat += latStep
-        ) {
-          for (
-            let lng = bounds.getSouthWest().lng - 0.5 * lngStep;
-            lng < bounds.getNorthEast().lng + 0.5 * lngStep;
-            lng += lngStep
-          ) {
-            const point = L.latLng(lat, lng);
-            if (isPointInPolygon(point, polygonLatLngs)) {
-              latlngs.push(point);
-            }
-          }
-        }
-
-        // Clear previous markers and circles
-        drawnItems.clearLayers();
-
-        // Add new markers and circles
-        let firstPoint = null;
-        let lastPoint = null;
-        latlngs.forEach((latlng, index) => {
-          const marker = L.marker(latlng).addTo(drawnItems);
-          const circle = L.circle(latlng, { radius: sprinklerRadius }).addTo(
-            drawnItems
-          );
-          marker
-            .bindPopup(
-              `Robot Point: ${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}`
-            )
-            .openPopup();
-
-          if (index === 0) firstPoint = latlng;
-          if (index === latlngs.length - 1) lastPoint = latlng;
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+            initDatePicker();
+            updateSavedPlansDropdown();
         });
 
-        // Calculate irrigation time
-        const area = L.GeometryUtil.geodesicArea(selectedArea.getLatLngs()[0]); // Area in m²
-        const { decade, month } = getDecadeAndMonth();
-        const dailyWaterNeed = getConsumption(decade, month); // Get daily water need based on decade and month
+        // Initialize the map with Google Earth-style satellite imagery
+        function initMap() {
+            map = L.map('map', {
+                zoomControl: true,
+                dragging: true,
+                maxZoom: 20
+            }).setView([30.0444, 31.2357], 16); // Default coordinates (Cairo)
 
-        // Calculate the number of robot points
-        const numberOfPoints = latlngs.length;
+            // Add Google Satellite layer
+            L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+                maxZoom: 20,
+                subdomains: ['mt0','mt1','mt2','mt3'],
+                attribution: 'Imagery © Google Earth'
+            }).addTo(map);
 
-        // Calculate the irrigation time per point
-        const irrigationTimePerPoint = (
-          dailyWaterNeed / waterFlowRate
-        ).toFixed(2);
+            // Add feature group for drawn items
+            drawnItems.addTo(map);
 
-        // Total irrigation time for all points
-        const totalIrrigationTime = (
-          irrigationTimePerPoint * numberOfPoints
-        ).toFixed(2);
-
-        // Display results in the results window
-        document.getElementById("resultPlantType").innerText = plantType;
-        document.getElementById("resultArea").innerText = (area / 1).toFixed(2);
-        document.getElementById("resultWaterNeed").innerText =
-          dailyWaterNeed.toFixed(2);
-        document.getElementById("resultFlowRate").innerText = waterFlowRate;
-        document.getElementById("resultPoints").innerText = numberOfPoints;
-        document.getElementById("resultTimePerPoint").innerText =
-          irrigationTimePerPoint;
-        document.getElementById("resultTotalTime").innerText =
-          totalIrrigationTime;
-        document.getElementById(
-          "resultFirstPoint"
-        ).innerText = `${firstPoint.lat.toFixed(5)}, ${firstPoint.lng.toFixed(
-          5
-        )}`;
-        document.getElementById(
-          "resultLastPoint"
-        ).innerText = `${lastPoint.lat.toFixed(5)}, ${lastPoint.lng.toFixed(
-          5
-        )}`;
-
-        // Show the results window
-        document.getElementById("resultsWindow").style.display = "block";
-      }
-
-      // Function to get decade and month
-      function getDecadeAndMonth() {
-        let decade;
-        const day = fp.selectedDates[0].getDate(); // Use getDate() instead of getDay()
-        if (day >= 1 && day <= 10) {
-          decade = "first decade";
-        } else if (day >= 11 && day <= 20) {
-          decade = "second decade";
-        } else if (day >= 21 && day <= 31) {
-          decade = "third decade";
-        } else {
-          decade = "invalid date";
+            // Initialize drawing mode button
+            document.getElementById('drawModeBtn').addEventListener('click', toggleDrawingMode);
+            
+            // Initialize delete buttons
+            document.getElementById('deleteLastBtn').addEventListener('click', deleteLastCircle);
+            document.getElementById('clearAllBtn').addEventListener('click', clearAllCircles);
+            
+            // Initialize save button
+            document.getElementById('save-calculation').addEventListener('click', savePlanHandler);
         }
-        let month = fp.selectedDates[0].getMonth();
-        return { decade, month };
-      }
 
-      // Function to get water consumption based on decade and month
-      function getConsumption(decade, month) {
-        const consumption = [
-          [.85, .4, 1.4],
-          [2.19, 2.91, 2.36],
-          [2.85, 2.95, 4.9],
-          [6.39, 7.42, 7.78],
-          [8.08, 8.5, 9.58],
-          [9.17, 9.66, 9.46],
-          [9.17, 8.88, 9.62],
-          [8.61, 8.47, 8.87],
-          [7.65, 7.24, 6.84],
-          [6.34, 5.89, 5.64],
-          [4.25, 3.42, 3.03],
-          [2.49, 1.98, 1.91],
-        ];
-        
-        if (decade === "first decade") decade = 0;
-        else if (decade === "second decade") decade = 1;
-        else if (decade === "third decade") decade = 2;
-        else throw new Error("Invalid decade");
-        return consumption[month][decade];
-      }
+        // Initialize date picker
+        function initDatePicker() {
+            flatpickr("#localdate", {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                defaultDate: new Date()
+            });
+        }
 
-      // Function to search for a location
-      function searchLocation() {
-        const query = document.getElementById("searchLocation").value;
-        if (!query) return;
-
-        fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${query}`
-        )
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.length > 0) {
-              const lat = parseFloat(data[0].lat);
-              const lon = parseFloat(data[0].lon);
-              map.setView([lat, lon], 16);
+        // Toggle drawing mode
+        function toggleDrawingMode() {
+            drawMode = !drawMode;
+            const btn = document.getElementById('drawModeBtn');
+            btn.textContent = drawMode ? 'Disable Drawing Mode' : 'Enable Drawing Mode';
+            btn.style.backgroundColor = drawMode ? 'var(--accent-color)' : 'var(--primary-color)';
+            
+            if (drawMode) {
+                map.on('click', drawCircle);
             } else {
-              alert("Location not found!");
+                map.off('click', drawCircle);
             }
-          })
-          .catch((error) => {
-            console.error("Error searching location:", error);
-          });
-      }
+        }
+
+        // Draw a new circle
+        function drawCircle(e) {
+            const radius = parseFloat(document.getElementById('sprinklerRadius').value) || 5;
+            const color = '#3388ff';
+            const circleId = circles.length + 1;
+            
+            // Create the circle
+            const circle = L.circle(e.latlng, {
+                radius: radius,
+                color: color,
+                fillColor: color,
+                fillOpacity: 0.2,
+                weight: 2
+            }).addTo(drawnItems);
+            
+            // Create container for the number (positioned absolutely)
+            const container = document.createElement('div');
+            container.className = 'circle-number-container';
+            container.id = `circle-number-${circleId}`;
+            container.style.position = 'absolute';
+            
+            // Create the number element
+            const numberElement = document.createElement('div');
+            numberElement.className = 'circle-number';
+            numberElement.textContent = circleId;
+            
+            container.appendChild(numberElement);
+            document.body.appendChild(container);
+            
+            // Store circle data
+            circles.push({
+                id: circleId,
+                latlng: e.latlng,
+                radius: radius,
+                layer: circle,
+                numberElement: container
+            });
+            
+            // Update position immediately
+            updateNumberPosition(circleId);
+            
+            // Update circle positions when map moves
+            map.on('moveend zoomend', updateCircleNumbersPosition);
+            
+            // Add click event to show popup
+            circle.on('click', function(ev) {
+                L.popup()
+                    .setLatLng(ev.latlng)
+                    .setContent(`Point #${circleId}<br>Radius: ${radius}m`)
+                    .openOn(map);
+            });
+        }
+
+        // Update position of a single number
+        function updateNumberPosition(circleId) {
+            const circleData = circles.find(c => c.id === circleId);
+            if (!circleData) return;
+            
+            const point = map.latLngToContainerPoint(circleData.latlng);
+            const container = circleData.numberElement;
+            
+            container.style.left = `${point.x}px`;
+            container.style.top = `${point.y}px`;
+        }
+
+        // Update positions of all numbers
+        function updateCircleNumbersPosition() {
+            circles.forEach(circle => {
+                updateNumberPosition(circle.id);
+            });
+        }
+
+        // Delete the last circle
+        function deleteLastCircle() {
+            if (circles.length === 0) return;
+            
+            const lastCircle = circles.pop();
+            drawnItems.removeLayer(lastCircle.layer);
+            document.body.removeChild(lastCircle.numberElement);
+        }
+
+        // Clear all circles
+        function clearAllCircles() {
+            circles.forEach(circle => {
+                drawnItems.removeLayer(circle.layer);
+                document.body.removeChild(circle.numberElement);
+            });
+            circles = [];
+            document.getElementById("resultsWindow").style.display = "none";
+        }
+
+        // Calculate irrigation parameters
+        function calculateIrrigation() {
+            const plantType = document.getElementById("plantType").value;
+            const sprinklerRadius = parseFloat(document.getElementById("sprinklerRadius").value) || 5;
+            const waterFlowRate = parseFloat(document.getElementById("waterFlowRate").value) || 10;
+            
+            if (circles.length === 0) {
+                alert("Please add at least one irrigation point");
+                return;
+            }
+            
+            // Calculate total area covered by circles (simplified approximation)
+            const totalArea = circles.length * Math.PI * Math.pow(sprinklerRadius, 2);
+            
+            // Get water needs based on date
+            const { decade, month } = getDecadeAndMonth();
+            const dailyWaterNeed = getConsumption(decade, month);
+            
+            // Calculate irrigation time per point
+            const irrigationTimePerPoint = (dailyWaterNeed / waterFlowRate).toFixed(2);
+            
+            // Total irrigation time
+            const totalIrrigationTime = (irrigationTimePerPoint * circles.length).toFixed(2);
+            
+            // Get first and last points
+            const firstPoint = circles[0].latlng;
+            const lastPoint = circles[circles.length - 1].latlng;
+            
+            // Store current calculation
+            currentCalculation = {
+                plantType,
+                sprinklerRadius,
+                waterFlowRate,
+                dailyWaterNeed,
+                numberOfPoints: circles.length,
+                irrigationTimePerPoint,
+                totalIrrigationTime,
+                firstPoint: `${firstPoint.lat.toFixed(5)}, ${firstPoint.lng.toFixed(5)}`,
+                lastPoint: `${lastPoint.lat.toFixed(5)}, ${lastPoint.lng.toFixed(5)}`,
+                area: totalArea.toFixed(2),
+                points: circles.map((circle, index) => ({
+                    lat: circle.latlng.lat,
+                    lng: circle.latlng.lng,
+                    pointNumber: index + 1,
+                    irrigationTime: irrigationTimePerPoint
+                })),
+                timestamp: new Date().toISOString()
+            };
+            
+            // Display results
+            displayResults(currentCalculation);
+        }
+
+        // Display calculation results
+        function displayResults(data) {
+            document.getElementById("resultPlantType").innerText = data.plantType;
+            document.getElementById("resultArea").innerText = data.area;
+            document.getElementById("resultWaterNeed").innerText = data.dailyWaterNeed.toFixed(2);
+            document.getElementById("resultFlowRate").innerText = data.waterFlowRate;
+            document.getElementById("resultPoints").innerText = data.numberOfPoints;
+            document.getElementById("resultTimePerPoint").innerText = data.irrigationTimePerPoint;
+            document.getElementById("resultTotalTime").innerText = data.totalIrrigationTime;
+            document.getElementById("resultFirstPoint").innerText = data.firstPoint;
+            document.getElementById("resultLastPoint").innerText = data.lastPoint;
+            
+            // Update area display
+            document.getElementById("areaValue").innerText = data.area;
+            
+            // Show results window
+            document.getElementById("resultsWindow").style.display = "block";
+        }
+
+        // Get decade and month from selected date
+        function getDecadeAndMonth() {
+            const dateInput = document.getElementById("localdate");
+            const date = new Date(dateInput.value);
+            
+            let decade;
+            const day = date.getDate();
+            if (day >= 1 && day <= 10) {
+                decade = "first decade";
+            } else if (day >= 11 && day <= 20) {
+                decade = "second decade";
+            } else {
+                decade = "third decade";
+            }
+            
+            const month = date.getMonth(); // 0-11
+            
+            return { decade, month };
+        }
+
+        // Get water consumption based on decade and month
+        function getConsumption(decade, month) {
+            const consumption = [
+                [0.85, 0.4, 1.4],
+                [2.19, 2.91, 2.36],
+                [2.85, 2.95, 4.9],
+                [6.39, 7.42, 7.78],
+                [8.08, 8.5, 9.58],
+                [9.17, 9.66, 9.46],
+                [9.17, 8.88, 9.62],
+                [8.61, 8.47, 8.87],
+                [7.65, 7.24, 6.84],
+                [6.34, 5.89, 5.64],
+                [4.25, 3.42, 3.03],
+                [2.49, 1.98, 1.91],
+            ];
+            
+            if (decade === "first decade") return consumption[month][0];
+            if (decade === "second decade") return consumption[month][1];
+            return consumption[month][2];
+        }
+
+        // Search for location
+        function searchLocation() {
+            const query = document.getElementById("searchLocation").value;
+            if (!query) return;
+
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        const lat = parseFloat(data[0].lat);
+                        const lon = parseFloat(data[0].lon);
+                        map.setView([lat, lon], 16);
+                    } else {
+                        alert("Location not found!");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error searching location:", error);
+                });
+        }
+
+        // Handle save plan
+        function savePlanHandler() {
+            if (!currentCalculation) {
+                alert("Please perform a calculation first");
+                return;
+            }
+            
+            const planName = document.getElementById('plan-name').value.trim();
+            if (!planName) {
+                alert("Please enter a plan name");
+                return;
+            }
+            
+            currentCalculation.name = planName;
+            savePlan(currentCalculation);
+            updateSavedPlansDropdown();
+            
+            alert(`Plan "${planName}" saved successfully!`);
+        }
+
+        // Save plan to localStorage
+        function savePlan(planData) {
+            let savedPlans = JSON.parse(localStorage.getItem('irrigationPlans')) || [];
+            savedPlans.push(planData);
+            localStorage.setItem('irrigationPlans', JSON.stringify(savedPlans));
+        }
+
+        // Update saved plans dropdown
+        function updateSavedPlansDropdown() {
+            const savedPlans = JSON.parse(localStorage.getItem('irrigationPlans')) || [];
+            const dropdown = document.getElementById('saved-plans-dropdown');
+            
+            dropdown.innerHTML = '';
+            
+            if (savedPlans.length === 0) {
+                dropdown.innerHTML = '<div class="no-plans">No saved plans yet</div>';
+                return;
+            }
+            
+            // Sort by timestamp (newest first)
+            savedPlans.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            savedPlans.forEach((plan, index) => {
+                const item = document.createElement('div');
+                item.className = 'saved-plan-item';
+                item.innerHTML = `
+                    <div class="plan-header">
+                        <strong>${plan.name || 'Unnamed Plan'}</strong>
+                        <button class="delete-plan" data-index="${index}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <small>${new Date(plan.timestamp).toLocaleString()}</small><br>
+                    ${plan.numberOfPoints} points, ${plan.area} m²
+                `;
+                
+                // Add click event to load plan
+                item.addEventListener('click', (e) => {
+                    if (!e.target.closest('.delete-plan')) {
+                        loadPlan(index);
+                    }
+                });
+                
+                // Add delete button event
+                const deleteBtn = item.querySelector('.delete-plan');
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deletePlan(index);
+                });
+                
+                dropdown.appendChild(item);
+            });
+        }
+
+        // Delete a plan
+        function deletePlan(index) {
+            if (confirm("Are you sure you want to delete this plan?")) {
+                const savedPlans = JSON.parse(localStorage.getItem('irrigationPlans')) || [];
+                savedPlans.splice(index, 1);
+                localStorage.setItem('irrigationPlans', JSON.stringify(savedPlans));
+                updateSavedPlansDropdown();
+            }
+        }
+
+        // Load a saved plan
+        function loadPlan(index) {
+            const savedPlans = JSON.parse(localStorage.getItem('irrigationPlans')) || [];
+            if (index >= savedPlans.length) return;
+            
+            const plan = savedPlans[index];
+            
+            // Clear existing data
+            clearAllCircles();
+            
+            // Set form values
+            document.getElementById("plantType").value = plan.plantType;
+            document.getElementById("localdate").value = new Date(plan.timestamp).toISOString().slice(0, 16);
+            document.getElementById("sprinklerRadius").value = plan.sprinklerRadius;
+            document.getElementById("waterFlowRate").value = plan.waterFlowRate;
+            document.getElementById("plan-name").value = plan.name || '';
+            
+            // Create circles for each point
+            plan.points.forEach(point => {
+                const latlng = L.latLng(point.lat, point.lng);
+                
+                // Create the circle
+                const circle = L.circle(latlng, {
+                    radius: plan.sprinklerRadius,
+                    color: '#3388ff',
+                    fillColor: '#3388ff',
+                    fillOpacity: 0.2,
+                    weight: 2
+                }).addTo(drawnItems);
+                
+                // Create container for the number
+                const container = document.createElement('div');
+                container.className = 'circle-number-container';
+                container.id = `circle-number-${point.pointNumber}`;
+                
+                // Create the number element
+                const numberElement = document.createElement('div');
+                numberElement.className = 'circle-number';
+                numberElement.textContent = point.pointNumber;
+                
+                container.appendChild(numberElement);
+                document.body.appendChild(container);
+                
+                // Store circle data
+                circles.push({
+                    id: point.pointNumber,
+                    latlng: latlng,
+                    radius: plan.sprinklerRadius,
+                    layer: circle,
+                    numberElement: container
+                });
+                
+                // Update position immediately
+                updateNumberPosition(point.pointNumber);
+            });
+            
+            // Update current calculation
+            currentCalculation = plan;
+            
+            // Display results
+            displayResults(plan);
+            
+            // Zoom to fit all circles
+            const bounds = drawnItems.getBounds();
+            if (bounds.isValid()) {
+                map.fitBounds(bounds);
+            }
+        }
+
+        // Send to robot (placeholder function)
+        function sendToRobot() {
+            if (!currentCalculation) {
+                alert("Please calculate an irrigation plan first");
+                return;
+            }
+            
+            document.getElementById("irrigation-status").textContent = "Status: Sending to robot...";
+            
+            // Simulate sending to robot
+            setTimeout(() => {
+                document.getElementById("irrigation-status").textContent = "Status: Irrigation started!";
+            }, 2000);
+        }
     </script>
-  </body>
+</body>
 </html>
