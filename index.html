@@ -186,6 +186,7 @@
             width: 100%;
             height: 400px;
             order: 2;
+            position: relative;
         }
         
         /* Controls */
@@ -288,26 +289,19 @@
         }
         
         /* Circle Numbers */
-        .circle-number-container {
-            position: absolute;
-            pointer-events: none;
-            z-index: 1000;
-            transform: translate(-50%, -50%);
-        }
-        
         .circle-number {
             background-color: rgba(255, 255, 255, 0.9);
             border-radius: 50%;
-            width: 28px;
-            height: 28px;
+            width: 20px;
+            height: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 12px;
             color: var(--primary-color);
-            box-shadow: 0 0 5px rgba(0,0,0,0.3);
-            border: 2px solid var(--primary-color);
+            box-shadow: 0 0 3px rgba(0,0,0,0.3);
+            border: 1px solid var(--primary-color);
         }
         
         /* Dropdown */
@@ -478,8 +472,6 @@
 <body>
     <!-- Navigation Bar -->
     <nav class="nav1">
-
-
         <div class="logo-container">
             <div class="logo" onclick="window.location='index.html'">
                 <span class="logo-text">TBR</span>
@@ -692,19 +684,16 @@
                 weight: 2
             }).addTo(drawnItems);
             
-            // Create container for the number (positioned absolutely)
-            const container = document.createElement('div');
-            container.className = 'circle-number-container';
-            container.id = `circle-number-${circleId}`;
-            container.style.position = 'absolute';
-            
-            // Create the number element
-            const numberElement = document.createElement('div');
-            numberElement.className = 'circle-number';
-            numberElement.textContent = circleId;
-            
-            container.appendChild(numberElement);
-            document.body.appendChild(container);
+            // Create a marker with a divIcon for the number
+            const numberMarker = L.marker(e.latlng, {
+                icon: L.divIcon({
+                    className: '', // Avoid default Leaflet styling
+                    html: `<div class="circle-number">${circleId}</div>`,
+                    iconSize: [20, 20], // Match the size of the circle-number
+                    iconAnchor: [10, 10] // Center the marker (half of iconSize)
+                }),
+                zIndexOffset: 1000 // Ensure the number is on top
+            }).addTo(drawnItems);
             
             // Store circle data
             circles.push({
@@ -712,14 +701,8 @@
                 latlng: e.latlng,
                 radius: radius,
                 layer: circle,
-                numberElement: container
+                numberMarker: numberMarker
             });
-            
-            // Update position immediately
-            updateNumberPosition(circleId);
-            
-            // Update circle positions when map moves
-            map.on('moveend zoomend', updateCircleNumbersPosition);
             
             // Add click event to show popup
             circle.on('click', function(ev) {
@@ -730,39 +713,20 @@
             });
         }
 
-        // Update position of a single number
-        function updateNumberPosition(circleId) {
-            const circleData = circles.find(c => c.id === circleId);
-            if (!circleData) return;
-            
-            const point = map.latLngToContainerPoint(circleData.latlng);
-            const container = circleData.numberElement;
-            
-            container.style.left = `${point.x}px`;
-            container.style.top = `${point.y}px`;
-        }
-
-        // Update positions of all numbers
-        function updateCircleNumbersPosition() {
-            circles.forEach(circle => {
-                updateNumberPosition(circle.id);
-            });
-        }
-
         // Delete the last circle
         function deleteLastCircle() {
             if (circles.length === 0) return;
             
             const lastCircle = circles.pop();
             drawnItems.removeLayer(lastCircle.layer);
-            document.body.removeChild(lastCircle.numberElement);
+            drawnItems.removeLayer(lastCircle.numberMarker);
         }
 
         // Clear all circles
         function clearAllCircles() {
             circles.forEach(circle => {
                 drawnItems.removeLayer(circle.layer);
-                document.body.removeChild(circle.numberElement);
+                drawnItems.removeLayer(circle.numberMarker);
             });
             circles = [];
             document.getElementById("resultsWindow").style.display = "none";
@@ -1017,18 +981,16 @@
                     weight: 2
                 }).addTo(drawnItems);
                 
-                // Create container for the number
-                const container = document.createElement('div');
-                container.className = 'circle-number-container';
-                container.id = `circle-number-${point.pointNumber}`;
-                
-                // Create the number element
-                const numberElement = document.createElement('div');
-                numberElement.className = 'circle-number';
-                numberElement.textContent = point.pointNumber;
-                
-                container.appendChild(numberElement);
-                document.body.appendChild(container);
+                // Create a marker with a divIcon for the number
+                const numberMarker = L.marker(latlng, {
+                    icon: L.divIcon({
+                        className: '',
+                        html: `<div class="circle-number">${point.pointNumber}</div>`,
+                        iconSize: [20, 20],
+                        iconAnchor: [10, 10]
+                    }),
+                    zIndexOffset: 1000
+                }).addTo(drawnItems);
                 
                 // Store circle data
                 circles.push({
@@ -1036,11 +998,8 @@
                     latlng: latlng,
                     radius: plan.sprinklerRadius,
                     layer: circle,
-                    numberElement: container
+                    numberMarker: numberMarker
                 });
-                
-                // Update position immediately
-                updateNumberPosition(point.pointNumber);
             });
             
             // Update current calculation
