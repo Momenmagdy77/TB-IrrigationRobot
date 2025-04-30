@@ -41,6 +41,12 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            background-image: url(Capture.PNG);
+            background-repeat:no-repeat ;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+
         }
         
         /* Navigation Bar */
@@ -54,6 +60,9 @@
             position: sticky;
             top: 0;
             z-index: 1000;
+            margin: auto;
+            padding-left: 35%;
+            padding-right:35% ;
         }
 
         .logo-container {
@@ -159,28 +168,22 @@
 
         /* Main Container */
         .main-container {
-            display: flex;
-            flex: 1;
+      
+            display: inline;
+            margin: auto;
             padding: 20px;
             gap: 20px;
         }
 
-        .left-panel {
-            flex: 1;
-            min-width: 300px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
+  
 
-        .map-panel {
-            flex: 3;
-        }
+      .map-panel {
+           margin: auto;
+           width: 97%;
+           height: 800px;
+        } 
 
-        .right-panel {
-            flex: 1;
-            min-width: 300px;
-        }
+   
 
         /* Controls */
         .controls, .search-container, .save-form {
@@ -230,7 +233,10 @@
         .button-danger:hover {
             background-color: var(--accent-light);
         }
-
+.area-display{
+    color: #ffffff;
+    font-weight: bolder;
+}
         /* Map */
         #map {
             height: 100%;
@@ -269,7 +275,7 @@
 
         /* Circle Numbers */
         .circle-number-container {
-            position: absolute;
+            position: relative;
             pointer-events: none;
             z-index: 1000;
             transform: translate(-50%, -50%);
@@ -351,30 +357,42 @@
 
         /* Irrigation button */
         .irrigation-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: auto;
-            padding: 15px 25px;
-            font-size: 1.1rem;
-            z-index: 1000;
-        }
+         width: 800px;
+         margin: auto;
+        } 
 
-        #irrigation-status {
-            position: fixed;
-            bottom: 70px;
-            right: 20px;
-            background: white;
-            padding: 10px 15px;
-            border-radius: 4px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            z-index: 1000;
+        
+        
+        @media (max-width: 1000px) {
+
+            body {
+                overflow: hidden;
+                height: 100%;
+                width: 100%;
+                background-image: url(assets_task_01jt1vkhw8e1gswthphb9jjtyf_1745966798_img_0.webp);
+                background-repeat:no-repeat ;
+                background-size: cover;
+                background-position: center;
+                background-attachment: fixed;
+                
+    
+              }
+      .nav1{
+        padding-left: 20%;
+        padding-right: 20%;
+      }
+      .main-container{
+padding-left:50%;
+width: 600px;
+      }
         }
     </style>
 </head>
 <body>
     <!-- Navigation Bar -->
     <nav class="nav1">
+
+
         <div class="logo-container">
             <div class="logo" onclick="window.location='index.html'">
                 <span class="logo-text">TBR</span>
@@ -526,7 +544,7 @@
                 zoomControl: true,
                 dragging: true,
                 maxZoom: 20
-            }).setView([30.0444, 31.2357], 16); // Default coordinates (Cairo)
+            }).setView([31.04098, 31.35722], 16); // Default coordinates (Mansoura University)
 
             // Add Google Satellite layer
             L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
